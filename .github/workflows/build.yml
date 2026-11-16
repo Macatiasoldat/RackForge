@@ -1,0 +1,48 @@
+name: Build RackForge
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  windows:
+    name: Windows 10 (VST3 x64)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build --config Release --target RackForge_VST3 RackForge_Standalone
+      - name: Upload VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: RackForge-Windows-VST3
+          path: build/RackForge_artefacts/Release/VST3/RackForge.vst3
+      - name: Upload Standalone
+        uses: actions/upload-artifact@v4
+        with:
+          name: RackForge-Windows-Standalone
+          path: build/RackForge_artefacts/Release/Standalone/RackForge.exe
+
+  macos:
+    name: macOS (AU + VST3, universel)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -B build -G Xcode
+      - name: Build
+        run: cmake --build build --config Release --target RackForge_AU RackForge_VST3 RackForge_Standalone
+      - name: Upload AU
+        uses: actions/upload-artifact@v4
+        with:
+          name: RackForge-macOS-AU
+          path: build/RackForge_artefacts/Release/AU/RackForge.component
+      - name: Upload VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: RackForge-macOS-VST3
+          path: build/RackForge_artefacts/Release/VST3/RackForge.vst3
