@@ -13,14 +13,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Configure
-        run: cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+        run: cmake -B build -A x64 -DCMAKE_BUILD_TYPE=Release
       - name: Build
         run: cmake --build build --config Release --target RackForge_VST3 RackForge_Standalone
+      - name: Zip VST3
+        shell: pwsh
+        run: Compress-Archive -Path build/RackForge_artefacts/Release/VST3/RackForge.vst3 -DestinationPath RackForge-Windows-VST3.zip
       - name: Upload VST3
         uses: actions/upload-artifact@v4
         with:
           name: RackForge-Windows-VST3
-          path: build/RackForge_artefacts/Release/VST3/RackForge.vst3
+          path: RackForge-Windows-VST3.zip
       - name: Upload Standalone
         uses: actions/upload-artifact@v4
         with:
@@ -36,13 +39,17 @@ jobs:
         run: cmake -B build -G Xcode
       - name: Build
         run: cmake --build build --config Release --target RackForge_AU RackForge_VST3 RackForge_Standalone
+      - name: Zip AU
+        run: cd build/RackForge_artefacts/Release/AU && zip -r "$GITHUB_WORKSPACE/RackForge-macOS-AU.zip" RackForge.component
+      - name: Zip VST3
+        run: cd build/RackForge_artefacts/Release/VST3 && zip -r "$GITHUB_WORKSPACE/RackForge-macOS-VST3.zip" RackForge.vst3
       - name: Upload AU
         uses: actions/upload-artifact@v4
         with:
           name: RackForge-macOS-AU
-          path: build/RackForge_artefacts/Release/AU/RackForge.component
+          path: RackForge-macOS-AU.zip
       - name: Upload VST3
         uses: actions/upload-artifact@v4
         with:
           name: RackForge-macOS-VST3
-          path: build/RackForge_artefacts/Release/VST3/RackForge.vst3
+          path: RackForge-macOS-VST3.zip
